@@ -15,4 +15,10 @@ public class GlobalExceptionHandler {
     public Map<String, String> handlerUserNotFound(UserNotFoundException e) {
         return Map.of("message", e.getMessage());
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleBadRequest(IllegalArgumentException e) {
+        return Map.of("message", e.getMessage());
+    }
 }
