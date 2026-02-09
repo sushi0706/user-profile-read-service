@@ -4,6 +4,7 @@ import com.sushi.userprofile.model.User;
 import com.sushi.userprofile.cache.UserCache;
 import com.sushi.userprofile.cache.CacheResult;
 import com.sushi.userprofile.repository.UserRepository;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,17 +36,16 @@ public class UserProfileService {
 
         // fetch from repository
         logger.debug("Cache MISS for userId={}", id);
-        User user = userRepository.findById(id);
-        if (user == null) {
+        try{
+            User user = userRepository.findById(id);
+            // populate cache
+            userCache.put(user, 60_000);
+            logger.debug("Cache PUT for userId={}", id);
+            return user;
+        } catch(EmptyResultDataAccessException e){
             userCache.putNotFound(id, 10_000);
             throw new UserNotFoundException(id);
         }
-
-        // populate cache
-        userCache.put(user, 60_000);
-        logger.debug("Cache PUT for userId={}", id);
-
-        return user;
     }
 
     public void updateUser(User user) {
